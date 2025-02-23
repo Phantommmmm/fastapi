@@ -43,6 +43,6 @@ def check_stock(prenda: str, talla: str, color: str, db: Session = Depends(get_d
     ).first()
     
     if stock:
-        return {"prenda": prenda, "talla": talla, "color": color, "cantidad": stock.cantidad}
+        return {"prenda": prenda, "talla": talla, "color": color, "cantidad": stock.stock}
     
     raise HTTPException(status_code=404, detail="No se ha encontrado ninguna prenda")
