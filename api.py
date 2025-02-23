@@ -35,12 +35,12 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/stock")
-def check_stock(prenda: PrendaRequest, db: Session = Depends(get_db)):
+@app.get("/stock")
+def check_stock(prenda: str, talla: str, color: str, db: Session = Depends(get_db)):
     stock_item = db.query(Stock).filter(
-        Stock.prenda == prenda.prenda,
-        Stock.talla == prenda.talla,
-        Stock.color == prenda.color
+        Stock.prenda == prenda,
+        Stock.talla == talla,
+        Stock.color == color
     ).first()
     
     if stock_item:
