@@ -20,7 +20,7 @@ class Stock(Base):
     prenda = Column(String, index=True)
     talla = Column(String, index=True)
     color = Column(String, index=True)
-    cantidad = Column(Integer)
+    stock = Column(Integer)
 
 
 app = FastAPI()
