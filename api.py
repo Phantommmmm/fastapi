@@ -42,7 +42,6 @@ def check_stock(prenda: str, talla: str, color: str, db: Session = Depends(get_d
         Stock.color == color
     ).first()
     
-    if stock:
-        return {"prenda": prenda, "talla": talla, "color": color, "cantidad": stock.stock}
+        return stock.stock
     
     raise HTTPException(status_code=404, detail="No se ha encontrado ninguna prenda")
