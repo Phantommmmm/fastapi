@@ -2,9 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from dotenv import load_dotenv
-from pydantic import BaseModel
-
 import os
+import json
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -12,6 +11,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 class Stock(Base):
     __tablename__ = "stock"
@@ -21,12 +21,9 @@ class Stock(Base):
     color = Column(String, index=True)
     stock = Column(Integer)
 
-class PrendaRequest(BaseModel):
-    prenda: str
-    talla: str
-    color: str
 
 app = FastAPI()
+
 
 def get_db():
     db = SessionLocal()
@@ -35,14 +32,26 @@ def get_db():
     finally:
         db.close()
 
+
 @app.get("/stock")
-def check_stock(prenda: str, talla: str, color: str, db: Session = Depends(get_db)):
-    stock_item = db.query(Stock).filter(
-        Stock.prenda == prenda,
-        Stock.talla == talla,
-        Stock.color == color
-    ).first()
+def check_stock(prenda: str, db: Session = Depends(get_db)):
+    try:
+        # Parse the JSON string provided in the query parameter
+        prenda_data = json.loads(prenda)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for prenda")
+
+    # Ensure the required keys are present in the parsed JSON
+    for key in ["prenda", "talla", "color"]:
+        if key not in prenda_data:
+            raise HTTPException(status_code=400, detail=f"Missing '{key}' in prenda JSON")
     
+    stock_item = db.query(Stock).filter(
+        Stock.prenda == prenda_data["prenda"],
+        Stock.talla == prenda_data["talla"],
+        Stock.color == prenda_data["color"]
+    ).first()
+
     if stock_item:
         return {"stock": stock_item.stock}
     
