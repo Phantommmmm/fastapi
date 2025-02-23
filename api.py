@@ -36,12 +36,12 @@ def get_db():
 @app.get("/stock")
 def check_stock(prenda: str, db: Session = Depends(get_db)):
     try:
-        # Parse the JSON string provided in the query parameter
         prenda_data = json.loads(prenda)
+        if isinstance(prenda_data, str):
+            prenda_data = json.loads(prenda_data)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON format for prenda")
 
-    # Ensure the required keys are present in the parsed JSON
     for key in ["prenda", "talla", "color"]:
         if key not in prenda_data:
             raise HTTPException(status_code=400, detail=f"Missing '{key}' in prenda JSON")
